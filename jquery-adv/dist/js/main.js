@@ -89,13 +89,13 @@ $(function () {
 
 $(function(){
 
-	var counter = 1;
+	var counter = 2;
 	var counter2 = counter + 1;
+	var counter3 = counter - 1;
 	var flag = true;
 
 	$('.slider__item').on('transitionend', function(e){
 	    e.preventDefault();
-
 	    
 	});
 
@@ -110,9 +110,14 @@ $(function(){
 
 		var leftSlider = $.Deferred();
 		var rightSlider = $.Deferred();
+		var bigSlider = $.Deferred();
 
 		var oppositeItems = $('.slider_opposite .slider__item'),
 			oppositeActive = oppositeItems.filter('.active');
+
+		var bigItems = $('.slider_big .slider__item'),
+			bigActive = bigItems.filter('.active');
+
 
 		if (flag) {
 			flag = false;
@@ -123,27 +128,31 @@ $(function(){
 			if (counter == items.length-1) {
 				counter2 = 0;
 			}
+			if (counter == 1) {
+				counter3 = 0;
+			}
 
 			var reqItem = items.eq(counter);
 			var oppositeReqItem = oppositeItems.eq(counter2);
+			var bigReqItem = bigItems.eq(counter3);
 
-
-			activeItem.animate({
+			function AnimateUp(el,em,slider){
+			el.animate({
 				'top' : '100%'
-			}, duration);
+			}, duration);	
+
+			em.animate({
+				'top' : '0%'
+			}, duration, function () {
+				el.removeClass('active').css('top', '-100%');
+
+				slider.resolve($(this));
+			});
+			};	
 
 			oppositeActive.animate({
 				'top' : '-100%'
 			}, duration);
- 
-			reqItem.animate({
-				'top' : '0%'
-			}, duration, function () {
-				activeItem.removeClass('active').css('top', '-100%');
-
-				leftSlider.resolve($(this));
-			});
-
 			oppositeReqItem.animate({
 				'top' : '0%'
 			}, duration, function () {
@@ -151,13 +160,16 @@ $(function(){
 
 				rightSlider.resolve($(this));
 			});
-
-			counter++;
+			counter++;	
 			counter2++;
+			counter3++;	
 
-			$.when(leftSlider, rightSlider).done(function (data1, data2) {
+			AnimateUp(activeItem,reqItem,leftSlider);
+			AnimateUp(bigActive,bigReqItem,bigSlider);
+			$.when(leftSlider, rightSlider,bigSlider).done(function (data1, data2,data3) {
 				data1.addClass('active');
 				data2.addClass('active');
+				data3.addClass('active');
 
 				flag = true;
 			});
